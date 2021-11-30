@@ -1,0 +1,10 @@
+#ignore target 
+target/
+#ignore .settings
+.settings/
+#ignore .project
+*.project
+#ignore .classpath
+*.classpath
+/bin/
+#application.conf
