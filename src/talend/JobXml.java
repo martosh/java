@@ -87,6 +87,7 @@ public class JobXml
 		   
 	   }
    }
+   
 //#######################################
 //  read context environment from XML
 //#######################################
@@ -238,7 +239,7 @@ public class JobXml
 				NodeList nList_metadata = eElement.getElementsByTagName("metadata");
                 String[] columnAttributes = { "usefulColumn", "length", "name", "sourceType", "nullable" };
                 
-                //full schema  
+                //full table schema   
 				for (int m_cnt = 0; m_cnt < nList_metadata.getLength(); m_cnt++) {
 
 					Node jobMetaNode = nList_metadata.item(m_cnt);
@@ -291,7 +292,7 @@ public class JobXml
 				//System.out.println( eElement.getAttribute("source") + " -> " + eElement.getAttribute("target"));
 			}
 		}
-
+        
 		for (int cnt = 0; cnt < Parents.size(); cnt++) {
 			ArrayList<String> memberChildren = new ArrayList<>();
 			memberChildren = this.isThisParent( Parents.get(cnt) );
@@ -316,7 +317,7 @@ public class JobXml
     	for (int cnt_member = 0; cnt_member < members.size(); cnt_member++) {	
     		String member = members.get(cnt_member);
 
-    		//if member is root zero the level
+    		//if member is root set zero the level variable
     		for ( int rc = 0; rc < Roots.size(); rc++ ) {
     			if (member.equals( Roots.get(rc))) {
     				level = 0;
@@ -348,7 +349,6 @@ public class JobXml
     					}
     					parentsChildren.get(member).remove(child_cnt);
     				}
-
     			}
     				
     			//put all children that are parent last
@@ -405,9 +405,7 @@ public class JobXml
     	     root.add( Parents.get(counter) );
         }   		
     	
-    	
     	return root;
-    	
     }
     
 //####################################################

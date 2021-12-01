@@ -16,7 +16,6 @@ import java.util.HashMap;
 //  --output field_name to be parsed
 
 public class ParseSql {
-
 	  
 	public static void main( String[] args ) {
 		System.out.println("Starting ParseSql:");
@@ -32,7 +31,5 @@ public class ParseSql {
         	System.out.println("Start paring file[" + job_file + "]");
         	JobXml job = new talend.JobXml( job_file,  options.get("context_env"));
         }
-        
-   
 	}
 }	
