@@ -32,6 +32,8 @@ public class JobXml
    private HashMap <String, ArrayList<String>> parentsChildren = new HashMap<>();
    
    private ArrayList<String> Children = new ArrayList <>();
+   //Ordered Tree is array with 
+   
    private ArrayList<String> OrderedTree = new ArrayList <>();
    private ArrayList<String> Roots = new ArrayList <>();
    private Integer level = 0;
@@ -185,6 +187,7 @@ public class JobXml
 				NodeList nList_lower = eElement.getElementsByTagName("elementParameter");
 
 				String uniq_name_key = null; //result hash key
+				
 				HashMap <String,String> inner_elements = new HashMap <>();
 
 				inner_elements.put("component_name", eElement.getAttribute("componentName"));
@@ -237,26 +240,44 @@ public class JobXml
 				
 				//Take metadata tag columns 
 				NodeList nList_metadata = eElement.getElementsByTagName("metadata");
+				
                 String[] columnAttributes = { "usefulColumn", "length", "name", "sourceType", "nullable" };
                 
+                StringBuilder schema = new StringBuilder();
+                
                 //full table schema   
-				for (int m_cnt = 0; m_cnt < nList_metadata.getLength(); m_cnt++) {
+                for (int m_cnt = 0; m_cnt < nList_metadata.getLength(); m_cnt++) {
 
-					Node jobMetaNode = nList_metadata.item(m_cnt);
-					Element jobMetaElement = (Element) jobMetaNode;
-				    System.out.println(jobMetaElement.getAttribute("connector") );
-					NodeList nList_bottom = jobMetaElement.getElementsByTagName("column");
-					
-					for (int bot_c = 0; bot_c < nList_bottom.getLength(); bot_c++) {
-						Node lastNode = nList_bottom.item(bot_c);
-						Element lastElement = (Element) lastNode;
-						
-						for (int attr_cnt = 0; attr_cnt < columnAttributes.length; attr_cnt++) {
-							System.out.println( lastElement.getAttribute( columnAttributes[attr_cnt]));
-						}
-					}
-				    
-				}
+                	Node jobMetaNode = nList_metadata.item(m_cnt);
+                	Element jobMetaElement = (Element) jobMetaNode;
+                	schema.append( jobMetaElement.getAttribute("connector") + "\n" );
+
+                	NodeList nList_bottom = jobMetaElement.getElementsByTagName("column");
+
+                	for (int bot_c = 0; bot_c < nList_bottom.getLength(); bot_c++) {
+                		Node lastNode = nList_bottom.item(bot_c);
+                		Element lastElement = (Element) lastNode;
+
+              			//header of csv
+                		if (bot_c == 0) {
+                			for (int attr_cnt = 0; attr_cnt < columnAttributes.length; attr_cnt++) {
+                				schema.append(columnAttributes[attr_cnt] + ";");
+                			}
+                		schema.append("\n\n");
+                		}
+                		
+                		
+                		for (int attr_cnt = 0; attr_cnt < columnAttributes.length; attr_cnt++) {
+                			schema.append( lastElement.getAttribute( columnAttributes[attr_cnt]) + ";");
+                		}
+
+                		schema.append("\n");
+                	}
+
+                	schema.append("\n");
+
+                }
+								inner_elements.put( "schema", schema.toString());
 			}
 		}
 
@@ -309,7 +330,8 @@ public class JobXml
 	}
     
 //###############################################################
-// callBack for building Parent->Child tree (Directory tree)  
+// callBack method for building Parent->Child tree array (Directory tree) 
+// Puts the result in this.OrderTree
 //###############################################################
     private void buildTree (ArrayList<String> members ) {
 

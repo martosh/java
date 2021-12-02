@@ -14,6 +14,8 @@ import java.util.HashMap;
 //  --html_output
 //  --debug_mode
 //  --output field_name to be parsed
+//  --original //don't use context variable //only original// with original context
+  
 
 public class ParseSql {
 	  
