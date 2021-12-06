@@ -6,7 +6,7 @@ package talend;
 import java.util.HashMap;
 
 //TODO Maybe in Future -> 
-//    Consider git branch
+//    Consider git branch must be used on develop maybe I need to do a check
 //  --help 
 //  --list_available_context
 //  --list_context_env
@@ -15,7 +15,7 @@ import java.util.HashMap;
 //  --debug_mode
 //  --output field_name to be parsed
 //  --original //don't use context variable //only original// with original context
-  
+//  --filter talendComponents
 
 public class ParseSql {
 	  

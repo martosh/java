@@ -19,7 +19,7 @@ public class CmdOptions {
 
 		Options options = new Options();
 
-		Option input =  new Option ( "job", "talend_job", true, "Talend job file to parse eg: path/NMPstatistik_0.29.item");
+		Option input =  new Option ( "jobs", "talend_job", true, "Talend job file to parse eg: path/NMPstatistik_0.29.item");
 		Option output = new Option ("o", "output", true, "Output result file for sql");
 		Option context_env = new Option ("ce", "context_env", true, "Take wanted context environment" );
 
@@ -54,7 +54,7 @@ public class CmdOptions {
 		result.put("output", cmd.getOptionValue("output"));
 		result.put("context_env", context_final);
 		this.Options = result;
-		this.Files = cmd.getOptionValues("job");
+		this.Files = cmd.getOptionValues("jobs");
 
 	}
 
