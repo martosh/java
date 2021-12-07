@@ -12,13 +12,12 @@ import org.w3c.dom.Element;
 //import java.io.Serializable;
 //import org.apache.commons.lang.builder.ToStringBuilder;
 //import org.apache.commons.lang.builder.ToStringStyle;
-
+//TODO: fix wrong Items files in --all option
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public class JobXml
 {
@@ -141,7 +140,7 @@ public class JobXml
 		if (found_cont_env == false ) {
 			System.out.println( "Error: no data found for context environment[" + context_env + "]");
 			System.out.println( "\tAvailable context environment: " + contextListBuilder.toString() );
-			System.exit(0);
+			//System.exit(0);
 		}
 
 		this.xmlContext = context_result; 
@@ -553,5 +552,6 @@ public class JobXml
 
 		return result.toString();
 	}
+	
 }
 // TalendEntity EntityCollector 
