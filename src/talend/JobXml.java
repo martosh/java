@@ -27,17 +27,15 @@ public class JobXml
 	private HashMap<String, String> xmlContext = new HashMap<>();
 	//result_hash maybe it's better to be a array of objects;
 	private HashMap<String, HashMap<String,String>> xmlComponents = new HashMap<>();
+
 	private ArrayList<String> Parents = new ArrayList <>();
-
 	private HashMap <String, ArrayList<String>> parentsChildren = new HashMap<>();
-
 	private ArrayList<String> Children = new ArrayList <>();
-	//Ordered Tree is array with 
-
 	private ArrayList<String> OrderedTree = new ArrayList <>();
 	private ArrayList<String> Roots = new ArrayList <>();
 	private Integer level = 0;
 	private Integer saved_node_level = 0;
+    private Document XmlDocument;
 
 	//#######################################
 	//  Constructor 
@@ -50,18 +48,11 @@ public class JobXml
 
 		if(xml.exists() && !xml.isDirectory() && xml.length() > 0) {
 
+			this.createXmlDocument();
 			this.createContextEnv();
-			System.out.print(this.getContextEnv().toString());
 			this.createComponents();
-			//System.out.print(this.getComponents().toString());
 			this.createOrderedTree();
 			//System.out.println( this.getOrderedTree.toString());
-
-			//for ( int cnt = 0; cnt < OrderedTree.size() ; cnt++) {
-			//System.out.println(OrderedTree.get(cnt) );
-			//}
-			//TODO: this will create useful data for some components for example create table statement;
-			//this.filter();
 
 			this.doOutput();
 
@@ -72,13 +63,15 @@ public class JobXml
 	}
 
 	//#######################################
-	// 
+	// Beta output  
 	//#######################################
 	private void doOutput() {
 
 		System.out.println("\n\n" + "#####".repeat(20));
 		System.out.println("\t#####->" + xml_path + "<-#####");
 		System.out.println("#####".repeat(20) + "\n" );
+	    System.out.println( "Context Environment: " + this.context_env);	
+		this.getContextEnv().forEach( (k,v) -> System.out.println( "\t" + k + " --> " + v  ));
 
 		for (int cnt = 0; cnt < OrderedTree.size(); cnt++ ) {
 			//level;node;name
@@ -120,14 +113,13 @@ public class JobXml
 
 				if (context_env.equalsIgnoreCase(eElement.getAttribute("name") ) ) {
 
-					System.out.println("Parsing context_env for " + this.context_env + "!");
+					//System.out.println("\n" + "Context Environment: " + this.context_env +  "\n");
 					found_cont_env = true;
 
 					NodeList nList_lower = eElement.getElementsByTagName("contextParameter");
 					for (int p_cnt = 0; p_cnt < nList_lower.getLength(); p_cnt++) {
 						Node cparNode = nList_lower.item(p_cnt);
 						Element cparElement = (Element) cparNode;
-						//System.out.println( cparElement.getAttribute("name") +  " -> " + cparElement.getAttribute("value"));
 
 						context_result.put(cparElement.getAttribute("name"), cparElement.getAttribute("value").replaceAll("\"", ""));
 					}
@@ -213,16 +205,19 @@ public class JobXml
 
 						if (jobElement.getAttribute("name").equalsIgnoreCase(element_to_take) ) {
 							String element_data = "";
+                            String original_data = jobElement.getAttribute("value");
 
-
-							element_data = fixContextValues(jobElement.getAttribute("value") , this.getContextEnv());
-							//add new line for readability remove it in html output 
+							element_data = fixContextValues( original_data, this.getContextEnv());
+							
+							
+							//Maybe not the best place for formating anyway ->adds new line for readability 
 							if (element_to_take.equalsIgnoreCase("query") ) {
 								element_data = "\n" + element_data + "\n\n";
 							}
 
 							if (element_data != null ) {
 								inner_elements.put( elementsToTakeOutputNameXmlName.get(element_to_take) , element_data );
+								inner_elements.put( "original_" + elementsToTakeOutputNameXmlName.get(element_to_take) , original_data );
 							}
 						}
 					}
@@ -449,25 +444,32 @@ public class JobXml
 	//####################################################
 	// Prepare xml document reader for parsing data   
 	//####################################################
-	private Document getXmlParser(){
-
+	private void createXmlDocument(){
+		
 		File inputFile = new File(this.xml_path);
 
+		Document doc = null;
+		
 		try {
 
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(inputFile);
+			doc = dBuilder.parse(inputFile);
 			doc.getDocumentElement().normalize();
-			return doc;
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		return null;
+        
+		this.XmlDocument = doc;
 	}
 
+	//#################################
+	// 
+	//#################################
+	public Document getXmlParser() {
+	      return this.XmlDocument;	
+	}
 	//####################################################
 	//  map sql query with context.env to executable sql 
 	//####################################################
