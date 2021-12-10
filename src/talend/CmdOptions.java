@@ -12,12 +12,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.apache.commons.cli.*;
 
-//TODO: check --jobs are they in the list of all
-       // make --jobs and Latest --tdir logic // maybe -tdir will presume all if jobs then will search in latest and --all_versions will search in older versions
-       // FIX -jobs bug when option after -jobs
-       // create --filter/find option I need know for all jobs list of jobs, list of components, show info 
-       // migrate to  JCommander there is a bug with UNLIMITED_VALUES
-	   // maybe tdir must be mandatory and may use UNLIMITED_VALUES
+
+      
 
 public class CmdOptions {
 
@@ -40,7 +36,8 @@ public class CmdOptions {
 		Option show_orig = new Option ("sorig", "show_original", false, "Show original not mapped with context env data" );
 		//Option all_latest = new Option ("alatest", "all_latest", false, "Execute the program for all latest versions" );
 
-		input.setArgs(Option.UNLIMITED_VALUES); 
+		input.setArgs(Option.UNLIMITED_VALUES); //BUGGY 
+		show_orig.setArgs(0);
 		//input.setRequired(true);
 
 		options.addOption(input);

@@ -17,6 +17,8 @@ import java.util.HashMap;
 //  --original //don't use context variables mapped //only original// with original context
 //  --find sql,java,original_sql, original_java, context, all "asdasdasd"
 //  --find_regex same
+//  --show and --hide options -show sql,java,
+//  --list_keys
 
 // FROM CMD CLASS
 // make --jobs and Latest --tdir logic // maybe -tdir will presume all if jobs then will search in latest and --all_versions will search in older versions
@@ -53,7 +55,7 @@ public class ParseApp {
         	String job_file = input_job_files.get(cnt);
         	System.out.println("Start paring file[" + job_file + "]");
         	try {
-        	   JobXml job = new talend.JobXml( job_file,  options.get("context_env"));
+        	   JobXml job = new talend.JobXml( job_file,  options);
 			} catch (Exception e) {
 				// TODO fix exception
 				e.printStackTrace();

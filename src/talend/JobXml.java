@@ -27,6 +27,7 @@ public class JobXml
 	private HashMap<String, String> xmlContext = new HashMap<>();
 	//result_hash maybe it's better to be a array of objects;
 	private HashMap<String, HashMap<String,String>> xmlComponents = new HashMap<>();
+	private HashMap<String, String> cmdOptions = new HashMap<>();
 
 	private ArrayList<String> Parents = new ArrayList <>();
 	private HashMap <String, ArrayList<String>> parentsChildren = new HashMap<>();
@@ -40,11 +41,12 @@ public class JobXml
 	//#######################################
 	//  Constructor 
 	//#######################################
-	public JobXml(String xml_path, String context_env) {
+	public JobXml(String xml_path, HashMap<String,String> options) {
 		File xml = new File(xml_path); 
 
 		this.xml_path = xml_path;
-		this.context_env = context_env;
+		this.cmdOptions = options;
+		this.context_env = options.get("context_env");
 
 		if(xml.exists() && !xml.isDirectory() && xml.length() > 0) {
 
@@ -73,6 +75,10 @@ public class JobXml
 	    System.out.println( "Context Environment: " + this.context_env);	
 		this.getContextEnv().forEach( (k,v) -> System.out.println( "\t" + k + " --> " + v  ));
 
+//							if (element_to_take.equalsIgnoreCase("query") ) {
+//								fixed_data = "\n" + fixed_data + "\n\n";
+//							}
+		
 		for (int cnt = 0; cnt < OrderedTree.size(); cnt++ ) {
 			//level;node;name
 			String[] params = OrderedTree.get(cnt).split(";");  
@@ -162,7 +168,7 @@ public class JobXml
 		HashMap<String, String> elementsToTakeOutputNameXmlName = new HashMap<String,String>(){{
 			put("file_action", "file_action" );
 			put("code" , "java_code");
-			put("query", "\nSQL" );
+			put("query", "SQL" );
 			put("host", "host" );
 			put("port", "port" );
 			put("user", "user" );
@@ -204,23 +210,24 @@ public class JobXml
 					{
 
 						if (jobElement.getAttribute("name").equalsIgnoreCase(element_to_take) ) {
-							String element_data = "";
+							String fixed_data = "";
                             String original_data = jobElement.getAttribute("value");
 
-							element_data = fixContextValues( original_data, this.getContextEnv());
-							
+							fixed_data = fixContextValues( jobElement.getAttribute("value"), this.getContextEnv());
 							
 							//Maybe not the best place for formating anyway ->adds new line for readability 
-							if (element_to_take.equalsIgnoreCase("query") ) {
-								element_data = "\n" + element_data + "\n\n";
-							}
 
-							if (element_data != null ) {
-								inner_elements.put( elementsToTakeOutputNameXmlName.get(element_to_take) , element_data );
-								inner_elements.put( "original_" + elementsToTakeOutputNameXmlName.get(element_to_take) , original_data );
+							if (fixed_data != null && ! fixed_data.equals("\"\"") ) {
+								inner_elements.put( elementsToTakeOutputNameXmlName.get(element_to_take) , fixed_data );
+								
+								if (this.cmdOptions.get("show_orig").equals("true") && original_data != null ) {
+									inner_elements.put( "original_" + elementsToTakeOutputNameXmlName.get(element_to_take) , original_data );
+								}
 							}
+							
 						}
 					}
+				      //System.out.println("############HASH########");	
 
 					//lowest level 
 					//TODO: if to many field are important from elementValue tag do it with for HashMap	
@@ -279,15 +286,15 @@ public class JobXml
 
 						schema.append("\n");
 
-
 						inner_elements.put( "schema", schema.toString());
 
-						//tHiveCreateTable
+						//tHiveCreateTable autogenerate CREATE statement
 						if ( inner_elements.get("component_name" ).contains("Create")) {
 							inner_elements.put(  "create_table" , this.genCreateTableStatement( inner_elements ));
 						}
 					}
-				}
+				} //end schema
+		            // inner_elements.forEach( (k,v) -> System.out.println( "\t" + k + " --> " + v  ));
 			}
 		}
 
