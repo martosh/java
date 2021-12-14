@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -12,15 +13,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.apache.commons.cli.*;
 
-
-      
-
 public class CmdOptions {
 
 	private HashMap<String, String> Options = new HashMap<>();
 	private ArrayList<String> AllLatestItems =  new ArrayList<>();
 	private ArrayList<String> CmdArgJobsFiles = new ArrayList<>();
-
+	private ArrayList<FindForIn> findObjects = new ArrayList<>();
+	
 	//##############################################
 	// Object with args
 	//##############################################
@@ -28,14 +27,17 @@ public class CmdOptions {
 
 		Options options = new Options();
 
-		Option input =  new Option ( "jobs", "talend_jobs", true, "Talend job file to parse eg: path/NMPstatistik_0.29.item");
+		Option input =  new Option ( "j", "talend_jobs", true, "Talend job file to parse eg: path/NMPstatistik_0.29.item");
 		Option output = new Option ("o", "output", true, "Output result in file, currently useless, and does't work");
 		Option context_env = new Option ("ce", "context_env", true, "Take wanted context environment" );
-		Option talend_git_dir = new Option ("tdir", "talend_git_dir", true, "Give directory where the parser will look recursively for Item files" );
+		Option talend_git_dir = new Option ("dir", "talend_git_dir", true, "Give directory where the parser will look recursively for Item files" );
 		Option list = new Option ("ls", "list_found_items", false, "List found Item jobs for a dir" );
-		Option show_orig = new Option ("sorig", "show_original", false, "Show original not mapped with context env data" );
+		Option show_orig = new Option ("org", "show_original", false, "Show original not mapped with context env data" );
+		Option find = new Option ("f", "find_for_in", true, "Find for some words in job elements" );
 		//Option all_latest = new Option ("alatest", "all_latest", false, "Execute the program for all latest versions" );
 
+		find.setArgs(2);
+		
 		input.setArgs(Option.UNLIMITED_VALUES); //BUGGY 
 		show_orig.setArgs(0);
 		//input.setRequired(true);
@@ -46,7 +48,7 @@ public class CmdOptions {
 		options.addOption(talend_git_dir);
 		options.addOption(list);
 		options.addOption(show_orig);
-//		options.addOption(all_latest);
+		options.addOption(find);
 		
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
@@ -59,8 +61,16 @@ public class CmdOptions {
 			formatter.printHelp("utility-name", options);
 			System.exit(1);
 		}
-
+	
 		HashMap<String, String> result = new HashMap<String, String> ();
+		//Create -find options FindForIn objects
+		if (cmd.hasOption("find_for_in")) {
+	        createFindOptions(cmd);
+	        result.put("find", "true");
+		} else {
+			result.put("find", "false");
+		}
+	    
 		// default context_env is PROD
 
 		String context_final = cmd.getOptionValue("context_env");		
@@ -102,10 +112,42 @@ public class CmdOptions {
 		}
 		
 	}
+
+
+	//#######################################################################################
+    //# 
+    //#######################################################################################
 	
-	//######################################################################
-    //# fill up this.AllLatestItems ArrayList with latest talend item files
-    //######################################################################
+	private void createFindOptions( CommandLine cmd ) {
+		
+		for ( int c = 0 ; c < cmd.getOptionValues( "find_for_in").length ; c++ ) {
+		//	System.out.println( "SHOW " + cmd.getOptionValues("find_for_in")[c] );
+			//split first, split second.
+			String[] findIn = null;
+			String[] findFor = null;
+			
+			if ((c % 2) == 0) {
+			    findFor =  cmd.getOptionValues("find_for_in")[c].split(",");
+			    findIn =  cmd.getOptionValues("find_for_in")[c + 1 ].split(",");
+			} else {
+				continue;
+			}
+			
+			FindForIn ffi = new FindForIn();
+			ArrayList<String> arrayFindFor = new ArrayList<String>(Arrays.asList(findFor));
+			ArrayList<String> arrayFindIn  = new ArrayList<String>(Arrays.asList(findIn));
+			
+			//System.out.println( arrayFindFor.toString());
+			//System.out.println( arrayFindIn.toString());
+			
+			ffi.setFindFor(arrayFindFor);
+			ffi.setFindIn(arrayFindIn);
+			this.findObjects.add(ffi);
+		}
+	}
+	//#######################################################################################
+    //# fill up this.AllLatestItems ArrayList with latest Talend item files from tdir option 
+    //#######################################################################################
 	private void getItemFiles (HashMap <String, String> input ) throws IOException {
 
 		//Talend job path -> version
@@ -167,6 +209,10 @@ public class CmdOptions {
 		return this.CmdArgJobsFiles;
 	}
 
+	//#########################
+	public ArrayList<FindForIn> getFindForIn() {
+		return this.findObjects;
+	}
     //#########################
     //
     //#########################

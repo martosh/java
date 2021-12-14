@@ -10,23 +10,21 @@ import java.util.HashMap;
 //  --help 
 //  --list_available_context
 //  --list_context_env
-//  --list_sql_no_map
 //  --html_output
 //  --debug_mode
-//  --output field_name to be parsed
-//  --original //don't use context variables mapped //only original// with original context
-//  --find sql,java,original_sql, original_java, context, all "asdasdasd"
-//  --find_regex same
+//  --find_in, --find_for 
+//  --find_regex 
 //  --show and --hide options -show sql,java,
 //  --list_keys
 
 // FROM CMD CLASS
 // make --jobs and Latest --tdir logic // maybe -tdir will presume all if jobs then will search in latest and --all_versions will search in older versions
-// FIX -jobs bug when option after -jobs
+// FIX -jobs bug when option after -jobs, solution migrate to  JCommander there is a bug with UNLIMITED_VALUES
 // create --filter/find option I need know for all jobs list of jobs, list of components, show info 
-// migrate to  JCommander there is a bug with UNLIMITED_VALUES
 // maybe tdir must be mandatory and may use UNLIMITED_VALUES
-// check --jobs are they in the list of all
+// Perform a check --jobs are they in the list of all
+// Inline::Java::Callback for best regex take a look at this lib
+
 public class ParseApp {
 	
 	//##############################
@@ -44,7 +42,8 @@ public class ParseApp {
 		options = CliOpt.getOptions();
 		ArrayList <String> input_job_files = CliOpt.getFiles();
 		ArrayList <String> all_latest_jobs = CliOpt.getAllLatestFiles();
-	
+
+		//ls option
 		if (options.get("list").equals("true") ){
 			input_job_files = CliOpt.getFiles();
 			input_job_files.forEach( System.out::println);
@@ -53,9 +52,9 @@ public class ParseApp {
 		
         for (int cnt = 0; cnt < input_job_files.size(); cnt ++) {
         	String job_file = input_job_files.get(cnt);
-        	System.out.println("Start paring file[" + job_file + "]");
+        	//System.out.println("Start paring file[" + job_file + "]");
         	try {
-        	   JobXml job = new talend.JobXml( job_file,  options);
+        	   JobXml job = new talend.JobXml( job_file,  options, CliOpt.getFindForIn());
 			} catch (Exception e) {
 				// TODO fix exception
 				e.printStackTrace();

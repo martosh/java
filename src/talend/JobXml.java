@@ -1,4 +1,4 @@
-package talend;
+package talend; 
 //TODO create log output/debug, remove stdout
 //output data should be implemented in objects 
 
@@ -37,11 +37,13 @@ public class JobXml
 	private Integer level = 0;
 	private Integer saved_node_level = 0;
     private Document XmlDocument;
+    
+	private ArrayList<FindForIn> findObjects;
 
 	//#######################################
 	//  Constructor 
 	//#######################################
-	public JobXml(String xml_path, HashMap<String,String> options) {
+	public JobXml(String xml_path, HashMap<String,String> options, ArrayList<FindForIn> findOpt) {
 		File xml = new File(xml_path); 
 
 		this.xml_path = xml_path;
@@ -56,12 +58,90 @@ public class JobXml
 			this.createOrderedTree();
 			//System.out.println( this.getOrderedTree.toString());
 
-			this.doOutput();
+			if (options.get("find").equals("false")) {
+				this.doOutput();
+			} else {
+				this.findObjects = findOpt;
+			}
+			
+			//forEach --find_for_in "asdasd","asdasd" sql,java
+		
+			if (options.get("find").equals("true")) {
+				this.findForIn();
+			}
 
 		} else {
 			System.out.println( "Error: the given xml file[" + xml_path + "] do not exist or it's too small");
 			System.exit(1);
 		}
+	}
+	
+	//#######################################
+	// Find
+	//#######################################
+	//private HashMap<String, String> findFor(HashMap<String,String> findTarget ) {
+	private void findForIn() {
+
+		//if no given elements 
+		System.out.println( "#########".repeat(20)); 
+		System.out.println( "\t\t" + xml_path ); 
+		System.out.println( "#########".repeat(20)); 
+		HashMap <String, HashMap<String, ?>> FindResult = new HashMap<>();
+
+		for (int cnt = 0; cnt < OrderedTree.size(); cnt++ ) {
+			//level;node;name
+			String[] params = OrderedTree.get(cnt).split(";");
+			String componentUniqName = params[2];
+			HashMap <String , String > result = new HashMap<>();
+			Integer all_counter = 0;
+
+			for (String comp_field_name : xmlComponents.get(componentUniqName).keySet()) {
+				String field_value = xmlComponents.get(componentUniqName).get(comp_field_name);
+
+				for ( int fcnt = 0; fcnt < this.findObjects.size(); fcnt++) {
+					//find in all else find in specific field
+					ArrayList<String> FindIn = this.findObjects.get(fcnt).getFindIn();
+					ArrayList<String> FindFor = this.findObjects.get(fcnt).getFindFor();
+
+					if ( FindIn.contains(comp_field_name) || FindIn.contains("all") ){
+
+						//findFor 
+						for ( int ffc = 0 ; ffc < FindFor.size(); ffc++) {
+							String findForString = this.findObjects.get(fcnt).getFindFor().get(ffc);
+							//System.out.println( componentUniqName + " findFor " + findForString + " " + comp_field_name + " value " + field_value );
+							Pattern r = Pattern.compile(findForString, Pattern.MULTILINE );
+							Matcher m = r.matcher( field_value );
+							Integer for_word_counter = 0;
+
+							while (m.find()){
+								all_counter++;
+								for_word_counter++;
+							}
+
+							if( for_word_counter > 0 ){
+								if (result.containsKey(findForString)) {
+									result.put( findForString, for_word_counter.toString() + " in " + comp_field_name + ", " + result.get(findForString));
+								} else {
+									result.put( findForString, for_word_counter.toString() + " in " + comp_field_name  );
+
+								}
+							}
+						}
+							   if (all_counter > 0 ) {
+                                result.put("match_counter", all_counter.toString());
+							   }
+					}
+				}
+
+			}
+
+
+			if (result.containsKey("match_counter") ) {
+				FindResult.put( componentUniqName, result );
+				System.out.println(  componentUniqName + " "  + result.toString()  );
+			}
+		}
+
 	}
 
 	//#######################################
@@ -75,10 +155,6 @@ public class JobXml
 	    System.out.println( "Context Environment: " + this.context_env);	
 		this.getContextEnv().forEach( (k,v) -> System.out.println( "\t" + k + " --> " + v  ));
 
-//							if (element_to_take.equalsIgnoreCase("query") ) {
-//								fixed_data = "\n" + fixed_data + "\n\n";
-//							}
-		
 		for (int cnt = 0; cnt < OrderedTree.size(); cnt++ ) {
 			//level;node;name
 			String[] params = OrderedTree.get(cnt).split(";");  
@@ -92,6 +168,7 @@ public class JobXml
 		}
 	}
 
+	
 	//#######################################
 	//  read context environment from XML
 	//#######################################
