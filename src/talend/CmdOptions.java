@@ -101,8 +101,8 @@ public class CmdOptions {
 		this.Options = result;
 		
 		//if no jobs args use all files 
-		if ( cmd.getOptionValues("jobs") != null && cmd.getOptionValues("jobs").length > 0 ) {
-		    Collections.addAll(this.CmdArgJobsFiles , cmd.getOptionValues("jobs"));
+		if ( cmd.getOptionValues("talend_jobs") != null && cmd.getOptionValues("talend_jobs").length > 0 ) {
+		    Collections.addAll(this.CmdArgJobsFiles , cmd.getOptionValues("talend_jobs"));
 		} else {
 			if (cmd.getOptionValue("talend_git_dir") == null) {
 				System.out.println("\nError: -jobs or -tdir needed. You must use -jobs, -tdir ot both!");

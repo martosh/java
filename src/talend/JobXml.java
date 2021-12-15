@@ -36,9 +36,11 @@ public class JobXml
 	private ArrayList<String> Roots = new ArrayList <>();
 	private Integer level = 0;
 	private Integer saved_node_level = 0;
-    private Document XmlDocument;
-    
+	private Document XmlDocument;
+
 	private ArrayList<FindForIn> findObjects;
+	private HashMap <String, HashMap<String, ?>> FindResult = new HashMap<>();
+	private int global_find_cnt = 0;
 
 	//#######################################
 	//  Constructor 
@@ -63,11 +65,12 @@ public class JobXml
 			} else {
 				this.findObjects = findOpt;
 			}
-			
+
 			//forEach --find_for_in "asdasd","asdasd" sql,java
-		
+
 			if (options.get("find").equals("true")) {
 				this.findForIn();
+				this.findOutput();
 			}
 
 		} else {
@@ -75,7 +78,61 @@ public class JobXml
 			System.exit(1);
 		}
 	}
-	
+
+	//#################################
+	//
+	//#################################
+	private void findOutput() {
+
+		//for (String comp_field_name : xmlComponents.get(componentUniqName).keySet()) {
+		if (global_find_cnt > 0 ) {
+
+			System.out.println( "#########".repeat(20)); 
+			System.out.println( "\t\t" + xml_path ); 
+			System.out.println( "#########".repeat(20)); 
+
+			for (int cnt = 0; cnt < OrderedTree.size(); cnt++ ) {
+				//level;node;name
+				String[] params = OrderedTree.get(cnt).split(";");
+				String comp_name = params[2];
+				if( this.FindResult.containsKey(comp_name)) {
+					//for (String comp_name : this.FindResult.keySet()) {
+
+					HashMap<String, ?> found_data = this.FindResult.get(comp_name);
+					String fields_to_show = (String) found_data.get("fields_to_show");
+
+					String original_custom_name =  xmlComponents.get(comp_name).get("original_custom_name");
+					String all = (String) found_data.get("match_counter");
+
+					System.out.printf( "%-20s", original_custom_name  );
+					System.out.printf( "%-20s", comp_name  );
+					System.out.println( "**Report**:" + "All Matches: " + all );
+
+					for (String found_comp_field : found_data.keySet()) {
+						String found_value = (String) found_data.get(found_comp_field);
+						//String field_value = xmlComponents.get(comp_name).get(found_comp_field);
+
+						if (found_comp_field.equals("original_custom_name") || found_comp_field.equals("fields_to_show") ||
+								found_comp_field.equals("match_counter") ) {
+							continue;
+						}
+
+						System.out.print( found_comp_field + " found " + found_value + ";");
+					}
+
+					for ( int c = 0; c < fields_to_show.split(",").length; c++) {
+						String showField = fields_to_show.split(",")[c];
+						System.out.println(  "\n" + "####".repeat(10) +"\n\t" + showField + "\n" + "####".repeat(10) + "\n");
+						System.out.println( xmlComponents.get(comp_name).get(showField));
+					}
+
+
+				}
+			}
+		}
+
+	}
+
 	//#######################################
 	// Find
 	//#######################################
@@ -83,9 +140,6 @@ public class JobXml
 	private void findForIn() {
 
 		//if no given elements 
-		System.out.println( "#########".repeat(20)); 
-		System.out.println( "\t\t" + xml_path ); 
-		System.out.println( "#########".repeat(20)); 
 		HashMap <String, HashMap<String, ?>> FindResult = new HashMap<>();
 
 		for (int cnt = 0; cnt < OrderedTree.size(); cnt++ ) {
@@ -95,6 +149,7 @@ public class JobXml
 			HashMap <String , String > result = new HashMap<>();
 			Integer all_counter = 0;
 
+			HashMap<String, Integer > seen = new HashMap<>();
 			for (String comp_field_name : xmlComponents.get(componentUniqName).keySet()) {
 				String field_value = xmlComponents.get(componentUniqName).get(comp_field_name);
 
@@ -105,7 +160,7 @@ public class JobXml
 
 					if ( FindIn.contains(comp_field_name) || FindIn.contains("all") ){
 
-						//findFor 
+						//Cycle all words that we search for  
 						for ( int ffc = 0 ; ffc < FindFor.size(); ffc++) {
 							String findForString = this.findObjects.get(fcnt).getFindFor().get(ffc);
 							//System.out.println( componentUniqName + " findFor " + findForString + " " + comp_field_name + " value " + field_value );
@@ -116,32 +171,42 @@ public class JobXml
 							while (m.find()){
 								all_counter++;
 								for_word_counter++;
+								global_find_cnt++;
 							}
 
 							if( for_word_counter > 0 ){
+								seen.put( comp_field_name , 1);
+
 								if (result.containsKey(findForString)) {
+
 									result.put( findForString, for_word_counter.toString() + " in " + comp_field_name + ", " + result.get(findForString));
 								} else {
 									result.put( findForString, for_word_counter.toString() + " in " + comp_field_name  );
-
 								}
 							}
 						}
-							   if (all_counter > 0 ) {
-                                result.put("match_counter", all_counter.toString());
-							   }
+
+						if (all_counter > 0 ) {
+							result.put("match_counter", all_counter.toString());
+							StringBuilder allFieldsToShow = new StringBuilder();
+
+							for( String fieldToShow : seen.keySet()) {
+								allFieldsToShow.append( fieldToShow + ",");
+							}
+
+							result.put("fields_to_show", allFieldsToShow.toString() );
+						}
 					}
 				}
-
 			}
-
 
 			if (result.containsKey("match_counter") ) {
 				FindResult.put( componentUniqName, result );
-				System.out.println(  componentUniqName + " "  + result.toString()  );
+				//System.out.println(  componentUniqName + " "  + result.toString()  );
 			}
 		}
 
+		this.FindResult = FindResult;
 	}
 
 	//#######################################
@@ -152,7 +217,7 @@ public class JobXml
 		System.out.println("\n\n" + "#####".repeat(20));
 		System.out.println("\t#####->" + xml_path + "<-#####");
 		System.out.println("#####".repeat(20) + "\n" );
-	    System.out.println( "Context Environment: " + this.context_env);	
+		System.out.println( "Context Environment: " + this.context_env);	
 		this.getContextEnv().forEach( (k,v) -> System.out.println( "\t" + k + " --> " + v  ));
 
 		for (int cnt = 0; cnt < OrderedTree.size(); cnt++ ) {
@@ -168,7 +233,7 @@ public class JobXml
 		}
 	}
 
-	
+
 	//#######################################
 	//  read context environment from XML
 	//#######################################
@@ -288,23 +353,23 @@ public class JobXml
 
 						if (jobElement.getAttribute("name").equalsIgnoreCase(element_to_take) ) {
 							String fixed_data = "";
-                            String original_data = jobElement.getAttribute("value");
+							String original_data = jobElement.getAttribute("value");
 
 							fixed_data = fixContextValues( jobElement.getAttribute("value"), this.getContextEnv());
-							
+
 							//Maybe not the best place for formating anyway ->adds new line for readability 
 
 							if (fixed_data != null && ! fixed_data.equals("\"\"") ) {
 								inner_elements.put( elementsToTakeOutputNameXmlName.get(element_to_take) , fixed_data );
-								
+
 								if (this.cmdOptions.get("show_orig").equals("true") && original_data != null ) {
 									inner_elements.put( "original_" + elementsToTakeOutputNameXmlName.get(element_to_take) , original_data );
 								}
 							}
-							
+
 						}
 					}
-				      //System.out.println("############HASH########");	
+					//System.out.println("############HASH########");	
 
 					//lowest level 
 					//TODO: if to many field are important from elementValue tag do it with for HashMap	
@@ -371,7 +436,7 @@ public class JobXml
 						}
 					}
 				} //end schema
-		            // inner_elements.forEach( (k,v) -> System.out.println( "\t" + k + " --> " + v  ));
+				// inner_elements.forEach( (k,v) -> System.out.println( "\t" + k + " --> " + v  ));
 			}
 		}
 
@@ -529,11 +594,11 @@ public class JobXml
 	// Prepare xml document reader for parsing data   
 	//####################################################
 	private void createXmlDocument(){
-		
+
 		File inputFile = new File(this.xml_path);
 
 		Document doc = null;
-		
+
 		try {
 
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -544,7 +609,7 @@ public class JobXml
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-        
+
 		this.XmlDocument = doc;
 	}
 
@@ -552,7 +617,7 @@ public class JobXml
 	// 
 	//#################################
 	public Document getXmlParser() {
-	      return this.XmlDocument;	
+		return this.XmlDocument;	
 	}
 	//####################################################
 	//  map sql query with context.env to executable sql 
@@ -617,7 +682,6 @@ public class JobXml
 			String  name   = columns[2];
 			String  type = columns[3].toLowerCase();
 			String  precision = columns[5];
-			//String  nullable = columns[4];
 
 			if (usable.equals("true") ) { //take active fields
 
@@ -638,6 +702,6 @@ public class JobXml
 
 		return result.toString();
 	}
-	
+
 }
 // TalendEntity EntityCollector 
