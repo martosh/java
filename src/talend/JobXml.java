@@ -86,10 +86,15 @@ public class JobXml
 
 		//for (String comp_field_name : xmlComponents.get(componentUniqName).keySet()) {
 		if (global_find_cnt > 0 ) {
+			
 
 			System.out.println( "#########".repeat(20)); 
-			System.out.println( "\t\t" + xml_path ); 
+		    System.out.println("#####->" + " @@@ " + xml_path + " @@@ " + "<-#####");
 			System.out.println( "#########".repeat(20)); 
+			
+			//show context env
+			System.out.println( "Context Environment: " + this.context_env);	
+			this.getContextEnv().forEach( (k,v) -> System.out.println( "\t" + k + " ===> " + v  ));
 
 			for (int cnt = 0; cnt < OrderedTree.size(); cnt++ ) {
 				//level;node;name
@@ -104,6 +109,7 @@ public class JobXml
 					String original_custom_name =  xmlComponents.get(comp_name).get("original_custom_name");
 					String all = (String) found_data.get("match_counter");
 
+					System.out.println( "#####".repeat(10));
 					System.out.printf( "%-20s", original_custom_name  );
 					System.out.printf( "%-20s", comp_name  );
 					System.out.println( "**Report**:" + "All Matches: " + all );
@@ -215,10 +221,11 @@ public class JobXml
 	private void doOutput() {
 
 		System.out.println("\n\n" + "#####".repeat(20));
-		System.out.println("\t#####->" + xml_path + "<-#####");
+		System.out.println("#####->" + " @@@ " + xml_path + " @@@ " + "<-#####");
 		System.out.println("#####".repeat(20) + "\n" );
+		
 		System.out.println( "Context Environment: " + this.context_env);	
-		this.getContextEnv().forEach( (k,v) -> System.out.println( "\t" + k + " --> " + v  ));
+		this.getContextEnv().forEach( (k,v) -> System.out.println( "\t" + k + " ===> " + v  ));
 
 		for (int cnt = 0; cnt < OrderedTree.size(); cnt++ ) {
 			//level;node;name
