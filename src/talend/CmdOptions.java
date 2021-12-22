@@ -33,8 +33,9 @@ public class CmdOptions {
 		Option talend_git_dir = new Option ("dir", "talend_git_dir", true, "Give directory where the parser will look recursively for Item files" );
 		Option list = new Option ("ls", "list_found_items", false, "List found Item jobs for a dir" );
 		Option show_orig = new Option ("org", "show_original", false, "Show original not mapped with context env data" );
-		Option find = new Option ("f", "find_for_in", true, "Find for some words in job elements" );
-		//Option all_latest = new Option ("alatest", "all_latest", false, "Execute the program for all latest versions" );
+		Option find = new Option ("f", "find_for_in", true, "Find for some words in job elements example -f string1,string2 all" );
+		Option help = new Option ("h", "help", false, "Prints help" );
+		//Option all_latest = new Option ("latest", "all_latest", false, "Execute the program for all latest versions" );
 
 		find.setArgs(2);
 		
@@ -49,6 +50,7 @@ public class CmdOptions {
 		options.addOption(list);
 		options.addOption(show_orig);
 		options.addOption(find);
+		options.addOption(help);
 		
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
@@ -58,6 +60,11 @@ public class CmdOptions {
 			cmd = parser.parse(options, args);
 		} catch (ParseException e) {
 			System.out.println( "\n" + e.getMessage() + "\n");
+			formatter.printHelp("utility-name", options);
+			System.exit(1);
+		}
+		
+		if ( cmd.hasOption("help")) {
 			formatter.printHelp("utility-name", options);
 			System.exit(1);
 		}
@@ -105,7 +112,7 @@ public class CmdOptions {
 		    Collections.addAll(this.CmdArgJobsFiles , cmd.getOptionValues("talend_jobs"));
 		} else {
 			if (cmd.getOptionValue("talend_git_dir") == null) {
-				System.out.println("\nError: -jobs or -tdir needed. You must use -jobs, -tdir ot both!");
+				System.out.println("\nError: -j or -dir option needed. You must use -j, -dir or both!");
 				System.exit(0);
 			}
 			this.CmdArgJobsFiles =  this.AllLatestItems;

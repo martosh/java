@@ -45,7 +45,7 @@ public class JobXml
 	//#######################################
 	//  Constructor 
 	//#######################################
-	public JobXml(String xml_path, HashMap<String,String> options, ArrayList<FindForIn> findOpt) {
+	public JobXml(String xml_path, HashMap<String,String> options, ArrayList<FindForIn> findOpt) throws Exception {
 		File xml = new File(xml_path); 
 
 		this.xml_path = xml_path;
@@ -55,7 +55,13 @@ public class JobXml
 		if(xml.exists() && !xml.isDirectory() && xml.length() > 0) {
 
 			this.createXmlDocument();
-			this.createContextEnv();
+			
+			try {
+				this.createContextEnv();
+			} catch (Exception e) {
+				throw new Exception("Can't find context enviroment for[" + context_env + "]" );
+			}
+			
 			this.createComponents();
 			this.createOrderedTree();
 			//System.out.println( this.getOrderedTree.toString());
@@ -74,8 +80,7 @@ public class JobXml
 			}
 
 		} else {
-			System.out.println( "Error: the given xml file[" + xml_path + "] do not exist or it's too small");
-			System.exit(1);
+			throw new Exception("Error: file doesn't exists [" + xml_path + "]" );
 		}
 	}
 
@@ -244,7 +249,7 @@ public class JobXml
 	//#######################################
 	//  read context environment from XML
 	//#######################################
-	private void createContextEnv() {
+	private void createContextEnv() throws Exception {
 		//takes String->Array
 
 		HashMap<String, String> context_result = new HashMap<String, String> ();
@@ -285,9 +290,7 @@ public class JobXml
 		}
 
 		if (found_cont_env == false ) {
-			System.out.println( "Error: no data found for context environment[" + context_env + "]");
-			System.out.println( "\tAvailable context environment: " + contextListBuilder.toString() );
-			//System.exit(0);
+			throw new Exception( "Can't find context env[" + context_env + "] Available context environment: " + contextListBuilder.toString() );
 		}
 
 		this.xmlContext = context_result; 
