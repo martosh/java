@@ -648,8 +648,12 @@ public class JobXml
 			if (contextEnv.containsKey(context_env_key)) {
 				replace_with_value = contextEnv.get(context_env_key);
 			} else {
-				replace_with_value = "MISSING_CONTEXT_KEY[context." + context_env_key + "]"; 
+				replace_with_value = "context." + context_env_key + "_MISSING_"; 
 			}
+			
+				if ( replace_with_value.equals("")) {
+					replace_with_value = "context_key[" + context_env_key + "]IS_EMPTY";
+				}
 
 			raw_string = raw_string.replaceAll("\"?\\s*\\+?\\s*context\\." + context_env_key + "\\s*\\+?\\s*\"?", replace_with_value );
 
@@ -680,6 +684,7 @@ public class JobXml
 
 		StringBuilder result = new StringBuilder();
 
+		//sometimes " appear in table name
 		result.append( "\n " + action + " " + elements.get("table").replaceAll("\"","") + " ( ");
 		
 		for ( int rcnt = 0; rcnt < rows.length; rcnt++ ) {
