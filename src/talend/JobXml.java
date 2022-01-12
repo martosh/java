@@ -328,6 +328,8 @@ public class JobXml
 			put("tableaction", "table_action" );
 			put("storage_format", "file_type" );
 			put("label", "custom_name" );
+			put("process", "sub_job_name" );
+			put("filename" , "filename");
 
 		}};
 
@@ -678,8 +680,8 @@ public class JobXml
 
 		StringBuilder result = new StringBuilder();
 
-		result.append( "\n " + action + " " + elements.get("table") + " ( ");
-
+		result.append( "\n " + action + " " + elements.get("table").replaceAll("\"","") + " ( ");
+		
 		for ( int rcnt = 0; rcnt < rows.length; rcnt++ ) {
 
 			if (rows[rcnt].isEmpty() ) {

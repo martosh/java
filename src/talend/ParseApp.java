@@ -7,15 +7,14 @@ import java.util.HashMap;
 //TODO Future -> 
 //  --add HashMap as Options to JobXml Constructor to be optional ORIGINAL CONTENT
 //    Consider git branch must be used on develop maybe I need to do a check
-//  --help 
 //  --list_available_context
 //  --list_context_env
 //  --html_output
 //  --debug_mode
-//  --find_in, --find_for 
-//  --find_regex 
+//  --find_regex  test
 //  --show and --hide options -show sql,java,
 //  --list_keys
+//  show the reasons for not parsed files.
 
 // FROM CMD CLASS
 // make --jobs and Latest --tdir logic // maybe -tdir will presume all if jobs then will search in latest and --all_versions will search in older versions
