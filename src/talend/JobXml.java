@@ -237,7 +237,7 @@ public class JobXml
 			String[] params = OrderedTree.get(cnt).split(";");  
 			System.out.println("");
 			System.out.println("####".repeat(10) );
-			System.out.println(params[0] +";" + params[1] + ";" + params[2]);
+			System.out.println(params[0] +";" + params[1] + ";" + params[2] + " --- " + xmlComponents.get(params[2]).get("custom_name"));
 			System.out.println("####".repeat(10) );
 			System.out.println("");
 			System.out.println( xmlComponents.get(params[2]));

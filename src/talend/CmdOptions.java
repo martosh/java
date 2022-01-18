@@ -1,6 +1,7 @@
 package talend;
 
 import java.io.IOException;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.apache.commons.cli.*;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 public class CmdOptions {
 
@@ -159,7 +161,9 @@ public class CmdOptions {
 
 		//Talend job path -> version
 		///example key:value {~/work/outrvstatistik_731/OUTRVSTATISTIK/process/KIS/KIS_Datentrager_report_st_": "0.9" }
-		HashMap <String, String> latest = new HashMap<>();
+		
+		HashMap <String, DefaultArtifactVersion> latest = new HashMap<>();
+		
 		ArrayList <String> result = new ArrayList<>();
 		
 		try (Stream<Path> walkStream = Files.walk(Paths.get( input.get("talend_git_dir") ) ) ) {
@@ -176,23 +180,20 @@ public class CmdOptions {
 					if(matchFound) {
 						String jobKeyPath =  m.group(1);
 						String jobVersion =  m.group(2);
-
+						DefaultArtifactVersion version = new DefaultArtifactVersion(jobVersion);
+						
 						if (latest.containsKey(jobKeyPath)) {
-							//check higher version;
-							int comp_result = Double.compare( Double.parseDouble( latest.get(jobKeyPath) ), Double.parseDouble(jobVersion));
-							//System.out.println( comp_result);
-
-							//0.1 vs 0.10 and 0.2 vs 0.20 etc workaround
-							if( comp_result == 0 && jobVersion.length() > latest.get(jobKeyPath).length()  ) {
-								latest.put(jobKeyPath, jobVersion);
-							}
-
-							if (comp_result < 0 ) {
-								latest.put(jobKeyPath, jobVersion);
+							int comp_result =  version.compareTo(latest.get(jobKeyPath));
+						    //System.out.println("Show me file[" + jobKeyPath + "] version[" + jobVersion + "] + comp_result[" + comp_result +
+						    //		"] saved [" + latest.get(jobKeyPath).toString() );
+						    
+						    //Current version is latest so update in latest hash
+							if (comp_result == 1 ) {
+								latest.put(jobKeyPath, version);
 							}
 
 						} else {
-							latest.put( jobKeyPath, jobVersion);
+							latest.put( jobKeyPath, version);
 						}
 
 					}
