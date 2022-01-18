@@ -59,7 +59,7 @@ public class JobXml
 			try {
 				this.createContextEnv();
 			} catch (Exception e) {
-				throw new Exception("Can't find context enviroment for[" + context_env + "]" );
+				throw new Exception("Can't find context enviroment for[" + context_env + "] in file[" + this.xml_path + "]");
 			}
 			
 			this.createComponents();
@@ -111,11 +111,11 @@ public class JobXml
 					HashMap<String, ?> found_data = this.FindResult.get(comp_name);
 					String fields_to_show = (String) found_data.get("fields_to_show");
 
-					String original_custom_name =  xmlComponents.get(comp_name).get("original_custom_name");
+					String custom_name =  xmlComponents.get(comp_name).get("custom_name");
 					String all = (String) found_data.get("match_counter");
 
 					System.out.println( "#####".repeat(10));
-					System.out.printf( "%-20s", original_custom_name  );
+					System.out.printf( "%-65s", custom_name  );
 					System.out.printf( "%-20s", comp_name  );
 					System.out.println( "**Report**:" + "All Matches: " + all );
 
@@ -175,7 +175,8 @@ public class JobXml
 						for ( int ffc = 0 ; ffc < FindFor.size(); ffc++) {
 							String findForString = this.findObjects.get(fcnt).getFindFor().get(ffc);
 							//System.out.println( componentUniqName + " findFor " + findForString + " " + comp_field_name + " value " + field_value );
-							Pattern r = Pattern.compile(findForString, Pattern.MULTILINE );
+							Pattern r = Pattern.compile(findForString, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE );
+														
 							Matcher m = r.matcher( field_value );
 							Integer for_word_counter = 0;
 
@@ -290,7 +291,7 @@ public class JobXml
 		}
 
 		if (found_cont_env == false ) {
-			throw new Exception( "Can't find context env[" + context_env + "] Available context environment: " + contextListBuilder.toString() );
+			throw new Exception( "Can't find context env[" + context_env + "] Available context environment: " + contextListBuilder.toString() + " for file[" + this.xml_path +"]" );
 		}
 
 		this.xmlContext = context_result; 
