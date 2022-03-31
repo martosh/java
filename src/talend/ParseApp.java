@@ -5,24 +5,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 //TODO Future -> 
-//  --add HashMap as Options to JobXml Constructor to be optional ORIGINAL CONTENT
-//    Consider git branch must be used on develop maybe I need to do a check
 //  --list_available_context
-//  --list_context_env
+//  --list_context_env show only context variables
+//  --custom_context_vars user=asdasd,password=asdasd
 //  --html_output
 //  --debug_mode
-//  --find_regex  test
-//  --show and --hide options -show sql,java,
-//  --list_keys
-//  show the reasons for not parsed files.
-
-// FROM CMD CLASS
+//  --show and --hide options -show sql,java, or filter_fields filter_components
+//  show the reasons for not parsed files at the end
 // make --jobs and Latest --tdir logic // maybe -tdir will presume all if jobs then will search in latest and --all_versions will search in older versions
-// FIX -jobs bug when option after -jobs, solution migrate to  JCommander there is a bug with UNLIMITED_VALUES
 // create --filter/find option I need know for all jobs list of jobs, list of components, show info 
-// maybe tdir must be mandatory and may use UNLIMITED_VALUES
+// make tdir multiple more than one dir
 // Perform a check --jobs are they in the list of all
-// Inline::Java::Callback for best regex take a look at this lib
 
 public class ParseApp {
 	

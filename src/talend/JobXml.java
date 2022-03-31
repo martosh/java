@@ -317,11 +317,13 @@ public class JobXml
 		Document doc = this.getXmlParser();
 		NodeList nList = doc.getElementsByTagName("node");
 
-		//This is mapping of names taken from xml and names show in the output 
+		//This is mapping of names taken from xml to names show in the output 
 		HashMap<String, String> elementsToTakeOutputNameXmlName = new HashMap<String,String>(){{
 			put("file_action", "file_action" );
 			put("code" , "java_code");
+			// it will be a problem if some component has query tag and sql_query
 			put("query", "SQL" );
+			put("sql_query", "SQL" );
 			put("host", "host" );
 			put("port", "port" );
 			put("user", "user" );
@@ -331,6 +333,18 @@ public class JobXml
 			put("label", "custom_name" );
 			put("process", "sub_job_name" );
 			put("filename" , "filename");
+			put("destination" , "file_destination");
+			put("remotedir", "remotedir");
+			put("fs_default_name", "fs_default_name" );
+			put("namenode_principal","namenode_principal" );
+			put("principal","principal" );
+			put("keytab_path","keytab_path" );
+			put("merge_path","merge_path" );
+			put("csvrowseparator", "csvrowseparator" );
+			put("fieldseparator", "fieldseparator" );
+			put("replace_file", "replace_file" );
+			put("remove_file", "remove_file" );
+			put("encoding","encoding");
 
 		}};
 
@@ -387,14 +401,28 @@ public class JobXml
 					//lowest level 
 					//TODO: if to many field are important from elementValue tag do it with for HashMap	
 					NodeList nList_bottom = jobElement.getElementsByTagName("elementValue");
+        				StringBuilder innerContext = new StringBuilder();
 
 					for (int bot_c = 0; bot_c < nList_bottom.getLength(); bot_c++) {
 						Node lastNode = nList_bottom.item(bot_c);
 						Element lastElement = (Element) lastNode;
+					    //System.out.println( lastElement.getAttribute("elementRef"));
 
 						if (lastElement.getAttribute("elementRef").equalsIgnoreCase("command")) {
 							inner_elements.put( "command", fixContextValues(lastElement.getAttribute("value"), this.getContextEnv() ));
 						}
+						
+					    
+						if (lastElement.getAttribute("elementRef").equalsIgnoreCase("PARAM_NAME_COLUMN")) {
+							innerContext.append( lastElement.getAttribute("value"));
+						}
+						
+					    if (lastElement.getAttribute("elementRef").equalsIgnoreCase("PARAM_VALUE_COLUMN")) {
+							innerContext.append(  "--->" + lastElement.getAttribute("value") + "\n");
+					        inner_elements.put( "sub_context_params", innerContext.toString() );
+						}
+						
+						
 					}
 
 					result.put(uniq_name_key, inner_elements);
@@ -439,9 +467,10 @@ public class JobXml
 							schema.append("\n");
 						}
 
-						schema.append("\n");
-
+						//schema.append("\n");
+                        if (schema.length() > 5) {
 						inner_elements.put( "schema", schema.toString());
+                        }
 
 						//tHiveCreateTable autogenerate CREATE statement
 						if ( inner_elements.get("component_name" ).contains("Create")) {
